@@ -15,6 +15,13 @@ For detailed usage of the renderer within the simulation environment, please ref
 To install the core package (without viewer dependencies):
 
 ```bash
+pip install gaussian-renderer
+```
+
+Or from source:
+```bash
+git clone https://github.com/TATP-233/GaussainRenderer.git
+cd GaussainRenderer
 pip install .
 ```
 

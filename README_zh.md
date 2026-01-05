@@ -12,6 +12,13 @@
 安装核心包（不包含查看器依赖）：
 
 ```bash
+pip install gaussian-renderer
+```
+
+从源码安装：
+```bash
+git clone https://github.com/TATP-233/GaussainRenderer.git
+cd GaussainRenderer
 pip install .
 ```
 
