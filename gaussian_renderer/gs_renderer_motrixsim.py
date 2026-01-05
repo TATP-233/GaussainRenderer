@@ -45,11 +45,11 @@ class MjMxBridge:
         self.map_qpos_idx_mjmx = np.arange(self._mj_model.nq, dtype=np.int32)
         for i in range(self._mj_model.nbody):
             body = self._mj_model.body(i)
-            if body.dofnum == 6:
+            if body.dofnum == 6 and self._mj_model.body_jntadr[i] > -1 and self._mj_model.jnt_type[self._mj_model.body_jntadr[i]] == int(mujoco.mjtJoint.mjJNT_FREE):
                 # xyz + quat[wxyz] -> xyz + quat[xyzw]
-                jnt_adr = body.jntadr[0]
-                self.map_qpos_idx_mjmx[jnt_adr+3:jnt_adr+7] = [
-                    jnt_adr+4, jnt_adr+5, jnt_adr+6, jnt_adr+3
+                qpos_adr = self._mj_model.jnt_qposadr[body.jntadr[0]]
+                self.map_qpos_idx_mjmx[qpos_adr+3:qpos_adr+7] = [
+                    qpos_adr+4, qpos_adr+5, qpos_adr+6, qpos_adr+3
                 ]
 
     @property
