@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gaussian_renderer"
+dynamic = ["version"]
+description = "A Gaussian Splatting Renderer and Tools"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "torch",
+    "scipy",
+    "plyfile",
+    "trimesh",
+    "gsplat",
+    "mujoco",
+]
+
+[project.optional-dependencies]
+viewer = [
+    "glfw",
+    "PyOpenGL",
+]
+
+[project.scripts]
+gs-viewer = "gaussian_renderer.simple_viewer:main"
+gs-compress = "gaussian_renderer.supersplat_compress:main"
+gs-transform = "gaussian_renderer.transform_gs_model:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "gaussian_renderer.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gaussian_renderer*"]
