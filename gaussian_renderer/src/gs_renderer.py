@@ -159,7 +159,7 @@ class GSRenderer:
             self.dynamic_mask[start:end] = True
             self.point_to_body_idx[start:end] = i
 
-    def update_gaussian_properties(self, pos: Union[np.ndarray, torch.Tensor], quat: Union[np.ndarray, torch.Tensor]):
+    def update_gaussian_properties(self, pos: Union[np.ndarray, torch.Tensor], quat: Union[np.ndarray, torch.Tensor], scalar_first: bool=True):
         """
         Batch update gaussian properties for multiple objects using vectorized operations.
         
@@ -174,6 +174,9 @@ class GSRenderer:
             pos = torch.from_numpy(pos).float().cuda()
         if not isinstance(quat, torch.Tensor):
             quat = torch.from_numpy(quat).float().cuda()
+        
+        if not scalar_first:
+            quat = quat[:, [3, 0, 1, 2]]  # Convert xyzw to wxyz
 
         # Gather poses for all dynamic points
         mask = self.dynamic_mask

@@ -22,13 +22,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from .src.gaussiandata import GaussianData, GaussianBatchData
+from .src.util_gau import load_ply, save_ply, transform_shs
+from .src.super_splat_loader import is_super_splat_format, load_super_splat_ply, save_super_splat_ply
+from .src.batch_rasterization import batch_render, batch_env_render, batch_update_gaussians
+from .src.gs_renderer import GSRenderer
+
 from .batch_splat import BatchSplatConfig, BatchSplatRenderer
 from .gs_renderer_mujoco import GSRendererMuJoCo
 try:
-    from .gs_renderer_motrixsim import MjMxBridge, GSRendererMotrixSim
+    from .gs_renderer_motrixsim import GSRendererMotrixSim
 except (ImportError, ModuleNotFoundError):
-    MjMxBridge = None
     GSRendererMotrixSim = None
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __author__ = "Yufei Jia"

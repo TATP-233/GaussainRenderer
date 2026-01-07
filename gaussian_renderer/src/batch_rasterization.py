@@ -284,6 +284,7 @@ def batch_update_gaussians(
     body_quat: Tensor, # (Nenv, Nbody, 4)
     point_to_body_idx: Optional[Tensor], # (N_points,)
     dynamic_mask: Optional[Tensor], # (N_points,)
+    scalar_first: bool=True
 ) -> GaussianBatchData:
     """
     Batch update gaussian positions and rotations based on body poses.
@@ -327,7 +328,10 @@ def batch_update_gaussians(
         # Template properties: (N_dynamic, 3/4) -> (1, N_dynamic, 3/4)
         xyz_ori = tmpl_xyz[mask].unsqueeze(0)
         rot_ori = tmpl_rot[mask].unsqueeze(0)
-        
+
+        if not scalar_first:
+            quat_expanded = quat_expanded[:, [3, 0, 1, 2]]  # Convert xyzw to wxyz
+
         # Apply transform
         # transform_points broadcasts: (1, N_dyn, 3) + (Nenv, N_dyn, 3) -> (Nenv, N_dyn, 3)
         xyz_new = transform_points(xyz_ori, pos_expanded, quat_expanded)

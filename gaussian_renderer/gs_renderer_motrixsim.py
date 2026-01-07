@@ -24,93 +24,94 @@
 from typing import Tuple, List, Union, Dict, Optional, Any, TYPE_CHECKING
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 from torch import Tensor
-
-import mujoco
-
 if TYPE_CHECKING:
-    # only import motrixsim for type checking to avoid hard dependency at runtime
     import motrixsim
+from .src.gs_renderer import GSRenderer
 
-from .gs_renderer_mujoco import GSRendererMuJoCo
-
-class MjMxBridge:
-    def __init__(self, mjcf_path: str, assets: Optional[Dict[str, Any]] = None):
-        if assets:
-            self._mj_model = mujoco.MjModel.from_xml_path(mjcf_path, assets=assets)
-        else:
-            self._mj_model = mujoco.MjModel.from_xml_path(mjcf_path)
-        self._mj_data = mujoco.MjData(self._mj_model)
-
-        self.map_qpos_idx_mjmx = np.arange(self._mj_model.nq, dtype=np.int32)
-        for i in range(self._mj_model.nbody):
-            body = self._mj_model.body(i)
-            if body.dofnum == 6 and self._mj_model.body_jntadr[i] > -1 and self._mj_model.jnt_type[self._mj_model.body_jntadr[i]] == int(mujoco.mjtJoint.mjJNT_FREE):
-                # xyz + quat[wxyz] -> xyz + quat[xyzw]
-                qpos_adr = self._mj_model.jnt_qposadr[body.jntadr[0]]
-                self.map_qpos_idx_mjmx[qpos_adr+3:qpos_adr+7] = [
-                    qpos_adr+4, qpos_adr+5, qpos_adr+6, qpos_adr+3
-                ]
-
-    @property
-    def mj_model(self) -> mujoco.MjModel:
-        return self._mj_model
-    
-    @property
-    def mj_data(self) -> mujoco.MjData:
-        return self._mj_data
-
-    def reset(self) -> None:
-        mujoco.mj_resetData(self._mj_model, self._mj_data)
-
-    def forward(self) -> None:
-        mujoco.mj_forward(self._mj_model, self._mj_data)
-
-    def update(self, mx_data: "motrixsim.SceneData") -> mujoco.MjData:
-        assert mx_data.dof_pos.shape[-1] == self._mj_model.nq, "DOF position size mismatch, {} vs {}".format(mx_data.dof_pos.shape[-1], self._mj_model.nq)
-        if len(mx_data.dof_pos.shape) == 2:
-            self._mj_data.qpos[self.map_qpos_idx_mjmx] = mx_data.dof_pos[0, :]
-        else:
-            self._mj_data.qpos[self.map_qpos_idx_mjmx] = mx_data.dof_pos[:]
-        mujoco.mj_forward(self._mj_model, self._mj_data)
-        return self._mj_data
-
-    def load_keyframe(self, mx_data: "motrixsim.SceneData", mx_model: "motrixsim.SceneModel", keyframe_idx: Union[int, str]) -> None:
-        mujoco.mj_resetData(self._mj_model, self._mj_data)
-        mujoco.mj_resetDataKeyframe(self._mj_model, self._mj_data, self._mj_model.key(keyframe_idx).id)
-        mujoco.mj_forward(self._mj_model, self._mj_data)
-        if len(mx_data.dof_pos.shape) == 2:
-            num_env = mx_data.dof_pos.shape[0]
-            mx_data.set_dof_pos(np.repeat(self._mj_data.qpos[self.map_qpos_idx_mjmx][np.newaxis, :], num_env, axis=0), mx_model)
-            mx_data.set_dof_vel(np.repeat(self._mj_data.qvel[np.newaxis, :], num_env, axis=0))
-            mx_data.actuator_ctrls = np.repeat(self._mj_data.ctrl[np.newaxis, :], num_env, axis=0)
-        else:
-            mx_data.set_dof_pos(self._mj_data.qpos[self.map_qpos_idx_mjmx], mx_model)
-            mx_data.set_dof_vel(self._mj_data.qvel)
-            mx_data.actuator_ctrls = self._mj_data.ctrl.copy()
-
-class GSRendererMotrixSim(GSRendererMuJoCo):
-    def __init__(self, models_dict: Dict[str, str], bridge:Optional[MjMxBridge] = None, mjcf_path: Optional[str]=None, assets: Optional[Dict[str, Any]] = None):
-        if bridge is not None:
-            self.bridge = bridge
-        elif mjcf_path is not None:
-            self.bridge = MjMxBridge(mjcf_path=mjcf_path, assets=assets)
-        else:
-            raise ValueError("Either bridge or mjcf_path must be provided.")
+class GSRendererMotrixSim(GSRenderer):
+    def __init__(self, models_dict: Dict[str, str]):
         super().__init__(models_dict)
-        super().init_renderer(self.bridge._mj_model)
+        self._mx_model = None
 
-    def init_renderer(self, mj_model=None) -> None:
-        # hold-place Initialization is done in the constructor
-        pass
+    def init_renderer(self, mx_model) -> None:
+        self._mx_model = mx_model
+
+        self.gs_idx_start = []
+        self.gs_idx_end = []
+        self.gs_body_ids = []
+        
+        objects_info = []
+
+        for i, link_name in enumerate(mx_model.link_names):
+            if link_name in self.gaussian_model_names:
+                start_idx = self.gaussian_start_indices[link_name]
+                end_idx = self.gaussian_end_indices[link_name]
+                self.gs_idx_start.append(start_idx)
+                self.gs_idx_end.append(end_idx)
+                self.gs_body_ids.append(i)
+                objects_info.append((link_name, start_idx, end_idx))
+
+        self.gs_idx_start = np.array(self.gs_idx_start)
+        self.gs_idx_end = np.array(self.gs_idx_end)
+        self.gs_body_ids = np.array(self.gs_body_ids)
+        
+        # Call the generic mapping method in base class
+        self.set_objects_mapping(objects_info)
 
     def update_gaussians(self, mx_data: "motrixsim.SceneData") -> None:
-        mj_data = self.bridge.update(mx_data)
-        super().update_gaussians(mj_data)
+        if not hasattr(self, 'gs_idx_start') or len(self.gs_idx_start) == 0:
+            return
+        
+        if not hasattr(self, "_mx_model") or self._mx_model is None:
+            raise RuntimeError("MotrixSim model is not initialized in the renderer, call init_renderer first.")
+
+        link_poses = self._mx_model.get_link_poses(mx_data)
+
+        # Batch extract position (N, 3)
+        pos_values = link_poses[self.gs_body_ids, :3]
+        
+        # Batch extract quaternion (N, 4) - wxyz
+        quat_values = link_poses[self.gs_body_ids, 3:7]
+        
+        # Call batch update interface
+        self.update_gaussian_properties(
+            pos_values,
+            quat_values,
+            scalar_first=False
+        )
 
     def render(self, 
+               mx_model: "motrixsim.MotrixSimModel",
+               mx_data: "motrixsim.SceneData",
                cam_ids:Union[List[int], np.ndarray], 
                width:int, height:int) -> Dict[int, Tuple[Tensor, Tensor]]:
         if -1 in cam_ids:
             raise NotImplementedError("Free camera rendering not supported in MotrixSim bridge.")
-        return super().render(self.bridge._mj_model, self.bridge._mj_data, cam_ids, width, height)
+
+        cam_pos_lst = []
+        cam_xmat_lst = []
+        fovy_lst = []
+        for cid in cam_ids:
+            cam = mx_model.cameras[cid]
+            cam_pose = cam.get_pose(mx_data)
+            cam_pos_lst.append(cam_pose[:3])
+            cam_xmat_lst.append(Rotation.from_quat(cam_pose[3:7]).as_matrix().flatten())
+            fovy_lst.append(42.) # TODO: get actual fovy from MotrixSim camera
+
+        rgb_tensor, depth_tensor = self.render_batch(
+            np.array(cam_pos_lst),
+            np.array(cam_xmat_lst),
+            height,
+            width,
+            np.array(fovy_lst)
+        )
+        
+        batch_indices = {cid: i for i, cid in enumerate(cam_ids)}
+        
+        results = {}
+        for cid, idx in batch_indices.items():
+            results[cid] = (rgb_tensor[idx], depth_tensor[idx])
+        
+        return results

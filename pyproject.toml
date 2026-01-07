@@ -24,6 +24,11 @@ viewer = [
     "PyOpenGL",
 ]
 
+[project.optional-dependencies]
+motrix = [
+    "motrixsim >= 0.5.0",
+]
+
 [project.scripts]
 gs-viewer = "gaussian_renderer.simple_viewer:main"
 gs-compress = "gaussian_renderer.supersplat_compress:main"

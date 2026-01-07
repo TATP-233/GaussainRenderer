@@ -32,9 +32,6 @@ from .src.gs_renderer import GSRenderer
 class GSRendererMuJoCo(GSRenderer):
     def __init__(self, models_dict: Dict[str, str]):
         super().__init__(models_dict)
-        self.gs_idx_start = []
-        self.gs_idx_end = []
-        self.gs_body_ids = []
 
     def init_renderer(self, mj_model):
         self.gs_idx_start = []
@@ -62,6 +59,9 @@ class GSRendererMuJoCo(GSRenderer):
     def update_gaussians(self, mj_data:mujoco.MjData):
         if not hasattr(self, 'gs_idx_start') or len(self.gs_idx_start) == 0:
             return
+
+        if not hasattr(self, 'gs_body_ids'):
+            raise RuntimeError("MuJoCo body IDs are not initialized in the renderer, call GSRendererMuJoCo.init_renderer first.")
 
         # Batch extract position (N, 3)
         pos_values = mj_data.xpos[self.gs_body_ids]
