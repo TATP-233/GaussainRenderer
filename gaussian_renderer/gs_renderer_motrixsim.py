@@ -31,11 +31,11 @@ if TYPE_CHECKING:
 from .src.gs_renderer import GSRenderer
 
 class GSRendererMotrixSim(GSRenderer):
-    def __init__(self, models_dict: Dict[str, str]):
+    def __init__(self, models_dict: Dict[str, str], mx_model:"motrixsim.MotrixSimModel") -> None:
         super().__init__(models_dict)
-        self._mx_model = None
+        self.init_renderer(mx_model)
 
-    def init_renderer(self, mx_model) -> None:
+    def init_renderer(self, mx_model:"motrixsim.MotrixSimModel") -> None:
         self._mx_model = mx_model
 
         self.gs_idx_start = []

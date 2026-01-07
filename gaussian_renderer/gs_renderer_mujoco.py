@@ -30,10 +30,11 @@ from scipy.spatial.transform import Rotation
 from .src.gs_renderer import GSRenderer
 
 class GSRendererMuJoCo(GSRenderer):
-    def __init__(self, models_dict: Dict[str, str]):
+    def __init__(self, models_dict: Dict[str, str], mj_model: mujoco.MjModel):
         super().__init__(models_dict)
+        self.init_renderer(mj_model)
 
-    def init_renderer(self, mj_model):
+    def init_renderer(self, mj_model: mujoco.MjModel):
         self.gs_idx_start = []
         self.gs_idx_end = []
         self.gs_body_ids = []
