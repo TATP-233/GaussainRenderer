@@ -28,12 +28,9 @@ from .src.super_splat_loader import is_super_splat_format, load_super_splat_ply,
 from .src.batch_rasterization import batch_render, batch_env_render, batch_update_gaussians
 from .src.gs_renderer import GSRenderer
 
-from .batch_splat import BatchSplatConfig, BatchSplatRenderer
 from .gs_renderer_mujoco import GSRendererMuJoCo
-try:
-    from .gs_renderer_motrixsim import GSRendererMotrixSim
-except (ImportError, ModuleNotFoundError):
-    GSRendererMotrixSim = None
+from .gs_renderer_motrixsim import GSRendererMotrixSim
+from .batch_splat import BatchSplatConfig, BatchSplatRenderer, MjxBatchSplatRenderer, MtxBatchSplatRenderer
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 __author__ = "Yufei Jia"

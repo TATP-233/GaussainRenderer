@@ -35,7 +35,7 @@ Where body_pos/body_quat/cam_pos/cam_xmat can come from mjx (MuJoCo JAX) state v
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING
 
 import numpy as np
 import torch
@@ -62,8 +62,10 @@ class BatchSplatConfig:
 
 
 class BatchSplatRenderer:
-    def __init__(self, cfg: BatchSplatConfig, mj_model=None):
-        device = cfg.device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
+    def __init__(self, cfg: BatchSplatConfig, body_name_to_id: Optional[Dict[str, int]]) -> None:
+        assert torch.cuda.is_available()
+        device = cfg.device or torch.device("cuda")
+
         self.device = device
         self.minibatch = cfg.minibatch
 
@@ -76,13 +78,6 @@ class BatchSplatRenderer:
         self.gs_idx_start: List[int] = []
         self.gs_idx_end: List[int] = []
         self.gs_body_ids: List[int] = []
-
-        body_name_to_id = {}
-        if mj_model is not None:
-            for i in range(mj_model.nbody):
-                body_name = mj_model.body(i).name
-                if body_name:
-                    body_name_to_id[body_name] = i
 
         # Load per-body gaussians
         for body_name, ply_path in cfg.body_gaussians.items():
@@ -140,7 +135,7 @@ class BatchSplatRenderer:
             self.dynamic_mask[start:end] = True
             self.point_to_body_idx[start:end] = body_id
 
-    def batch_update_gaussians(self, body_pos: Tensor, body_quat: Tensor):
+    def batch_update_gaussians(self, body_pos: Tensor, body_quat: Tensor, scalar_first=True) -> GaussianBatchData:
         """Update gaussians using body poses.
 
         Args:
@@ -150,14 +145,21 @@ class BatchSplatRenderer:
             GaussianBatchData with per-env gaussians.
         """
         # Ensure device
-        body_pos = body_pos.to(self.device)
-        body_quat = body_quat.to(self.device)
+        if not isinstance(body_pos, torch.Tensor):
+            body_pos = torch.tensor(body_pos, device=self.device, dtype=torch.float32)
+        if not isinstance(body_quat, torch.Tensor):
+            body_quat = torch.tensor(body_quat, device=self.device, dtype=torch.float32)
+        if not body_pos.device == self.device:
+            body_pos = body_pos.to(self.device)
+        if not body_quat.device == self.device:
+            body_quat = body_quat.to(self.device)
         return _batch_update_gaussians(
             self.template,
             body_pos,
             body_quat,
             point_to_body_idx=self.point_to_body_idx,
             dynamic_mask=self.dynamic_mask,
+            scalar_first=scalar_first
         )
 
     def batch_env_render(
@@ -171,8 +173,40 @@ class BatchSplatRenderer:
         bg_imgs: Optional[Tensor] = None,
     ):
         """Render RGBD for batch envs and cameras."""
-        cam_pos = cam_pos.to(self.device)
-        cam_xmat = cam_xmat.to(self.device)
+        if not isinstance(cam_pos, torch.Tensor):
+            cam_pos = torch.tensor(cam_pos, device=self.device, dtype=torch.float32)
+        if not isinstance(cam_xmat, torch.Tensor):
+            cam_xmat = torch.tensor(cam_xmat, device=self.device, dtype=torch.float32)
+        if not cam_pos.device == self.device:
+            cam_pos = cam_pos.to(self.device)
+        if not cam_xmat.device == self.device:
+            cam_xmat = cam_xmat.to(self.device)
         return _batch_env_render(gsb, cam_pos, cam_xmat, height, width, fovy, bg_imgs=bg_imgs, minibatch=self.minibatch)
 
-__all__ = ["BatchSplatConfig", "BatchSplatRenderer"]
+if TYPE_CHECKING:
+    import mujoco
+
+class MjxBatchSplatRenderer(BatchSplatRenderer):
+    def __init__(self, cfg: BatchSplatConfig, mj_model:"mujoco.MjModel") -> None:
+        body_name_to_id = {}
+        for i in range(mj_model.nbody):
+            body_name = mj_model.body(i).name
+            if body_name:
+                body_name_to_id[body_name] = i
+        super().__init__(cfg, body_name_to_id)
+
+if TYPE_CHECKING:
+    import motrixsim
+
+class MtxBatchSplatRenderer(BatchSplatRenderer):
+    def __init__(self, cfg, mx_model:"motrixsim.MotrixSimModel") -> None:
+        body_name_to_id = {}
+        for i, link_name in enumerate(mx_model.link_names):
+            if link_name:
+                body_name_to_id[link_name] = i
+        super().__init__(cfg, body_name_to_id)
+    
+    def batch_update_gaussians(self, body_pos: Tensor, body_quat: Tensor) -> GaussianBatchData:
+        return super().batch_update_gaussians(body_pos, body_quat, scalar_first=False)
+
+__all__ = ["BatchSplatConfig", "BatchSplatRenderer", "MjxBatchSplatRenderer", "MtxBatchSplatRenderer"]

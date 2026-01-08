@@ -176,7 +176,7 @@ class GSRenderer:
             quat = torch.from_numpy(quat).float().cuda()
         
         if not scalar_first:
-            quat = quat[:, [3, 0, 1, 2]]  # Convert xyzw to wxyz
+            quat = quat[..., [3, 0, 1, 2]]  # Convert xyzw to wxyz
 
         # Gather poses for all dynamic points
         mask = self.dynamic_mask

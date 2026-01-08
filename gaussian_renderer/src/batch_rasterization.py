@@ -330,7 +330,7 @@ def batch_update_gaussians(
         rot_ori = tmpl_rot[mask].unsqueeze(0)
 
         if not scalar_first:
-            quat_expanded = quat_expanded[:, [3, 0, 1, 2]]  # Convert xyzw to wxyz
+            quat_expanded = quat_expanded[..., [3, 0, 1, 2]]  # Convert xyzw to wxyz
 
         # Apply transform
         # transform_points broadcasts: (1, N_dyn, 3) + (Nenv, N_dyn, 3) -> (Nenv, N_dyn, 3)
