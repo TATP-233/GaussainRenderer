@@ -25,7 +25,7 @@ viewer = [
 ]
 
 motrix = [
-    "motrixsim >= 0.4.0",
+    "motrixsim >= 0.5.0",
 ]
 
 [project.scripts]

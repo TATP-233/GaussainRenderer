@@ -94,11 +94,12 @@ class GSRendererMotrixSim(GSRenderer):
         cam_xmat_lst = []
         fovy_lst = []
         for cid in cam_ids:
+            # assert cid < len(mx_model.cameras), f"Camera ID {cid} out of range for MotrixSim model with {len(mx_model.cameras)} cameras."
             cam = mx_model.cameras[cid]
             cam_pose = cam.get_pose(mx_data)
             cam_pos_lst.append(cam_pose[:3])
             cam_xmat_lst.append(Rotation.from_quat(cam_pose[3:7]).as_matrix().flatten())
-            fovy_lst.append(42.) # TODO: get actual fovy from MotrixSim camera
+            fovy_lst.append(mx_model.cameras[cid].fovy) # TODO: get actual fovy from MotrixSim camera
 
         rgb_tensor, depth_tensor = self.render_batch(
             np.array(cam_pos_lst),
