@@ -29,6 +29,31 @@ pip install .
 pip install ".[viewer]"
 ```
 
+### 带 MuJoCo 支持（可选）
+如需使用与 MuJoCo 相关的功能（例如 `gaussian_renderer/gs_renderer_mujoco.py` 中的模块），请安装可选的 MuJoCo 依赖：
+
+```bash
+pip install ".[mujoco]"
+```
+
+### 带 MotrixSim 支持（可选）
+如需启用与 MotrixSim 的集成，请安装可选依赖：
+
+```bash
+pip install ".[motrix]"
+```
+
+### 组合安装示例
+您可以按需组合安装多个 extras，例如：
+
+```bash
+# 查看器 + MuJoCo
+pip install ".[viewer,mujoco]"
+
+# 查看器 + MotrixSim
+pip install ".[viewer,motrix]"
+```
+
 ## 命令行使用
 
 本包提供了三个命令行工具：

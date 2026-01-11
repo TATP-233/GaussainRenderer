@@ -15,7 +15,6 @@ dependencies = [
     "plyfile",
     "trimesh",
     "gsplat",
-    "mujoco",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +25,10 @@ viewer = [
 
 motrix = [
     "motrixsim >= 0.5.0",
+]
+
+mujoco = [
+    "mujoco",
 ]
 
 [project.scripts]

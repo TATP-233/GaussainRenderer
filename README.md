@@ -32,6 +32,31 @@ To install with viewer dependencies (glfw, PyOpenGL):
 pip install ".[viewer]"
 ```
 
+### With MuJoCo Support (Optional)
+To use MuJoCo-related functionality (e.g., modules in `gaussian_renderer/gs_renderer_mujoco.py`), install the optional MuJoCo extra:
+
+```bash
+pip install ".[mujoco]"
+```
+
+### With MotrixSim Support (Optional)
+To enable MotrixSim integration, install the optional extra:
+
+```bash
+pip install ".[motrix]"
+```
+
+### Combine Extras
+You can combine extras as needed, for example:
+
+```bash
+# Viewer + MuJoCo
+pip install ".[viewer,mujoco]"
+
+# Viewer + MotrixSim
+pip install ".[viewer,motrix]"
+```
+
 ## Usage
 
 This package provides three command-line tools:
