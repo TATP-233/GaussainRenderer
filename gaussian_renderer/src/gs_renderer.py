@@ -25,6 +25,7 @@ from typing import Tuple, List, Union, Dict, Optional
 
 import numpy as np
 import torch
+from torch import Tensor
 
 try:
     from gsplat.rendering import rasterization
@@ -159,7 +160,7 @@ class GSRenderer:
             self.dynamic_mask[start:end] = True
             self.point_to_body_idx[start:end] = i
 
-    def update_gaussian_properties(self, pos: Union[np.ndarray, torch.Tensor], quat: Union[np.ndarray, torch.Tensor], scalar_first: bool=True):
+    def update_gaussian_properties(self, pos: Union[np.ndarray, Tensor], quat: Union[np.ndarray, Tensor], scalar_first: bool=True):
         """
         Batch update gaussian properties for multiple objects using vectorized operations.
         
@@ -170,9 +171,9 @@ class GSRenderer:
         if self.dynamic_mask is None or not self.dynamic_mask.any():
             return
 
-        if not isinstance(pos, torch.Tensor):
+        if not isinstance(pos, Tensor):
             pos = torch.from_numpy(pos).float().cuda()
-        if not isinstance(quat, torch.Tensor):
+        if not isinstance(quat, Tensor):
             quat = torch.from_numpy(quat).float().cuda()
         
         if not scalar_first:
@@ -198,7 +199,7 @@ class GSRenderer:
         self.gau_xyz_all_cu = self.gaussians.xyz
         self.gau_rot_all_cu = self.gaussians.rot
 
-    def render_batch(self, cam_pos: np.ndarray, cam_xmat: np.ndarray, height: int, width: int, fovy_arr: np.ndarray):
+    def render_batch(self, cam_pos: np.ndarray, cam_xmat: np.ndarray, height: int, width: int, fovy_arr: np.ndarray, bg_imgs:Optional[Tensor]=None, y_up:Optional[bool]=True) -> Tuple[Tensor, Tensor]:
         """
         Pure rendering call using batch_render.
         
@@ -208,7 +209,8 @@ class GSRenderer:
             height: int
             width: int
             fovy_arr: (N_cams,) array of fov values
-            
+            bg_imgs: Optional[Tensor] = None
+            y_up: Optional[bool] = True
         Returns:
             rgb_tensor, depth_tensor
         """
@@ -218,5 +220,7 @@ class GSRenderer:
             cam_xmat,
             height,
             width,
-            fovy_arr
+            fovy_arr,
+            bg_imgs=bg_imgs,
+            y_up=y_up
         )
