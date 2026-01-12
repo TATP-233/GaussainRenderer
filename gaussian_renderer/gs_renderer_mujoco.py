@@ -21,20 +21,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from typing import Tuple, List, Union, Dict, Optional, Any
+from typing import Tuple, List, Union, Dict, Optional, Any, TYPE_CHECKING
 
 import numpy as np
-from torch import Tensor
-import mujoco
 from scipy.spatial.transform import Rotation
+from torch import Tensor
+if TYPE_CHECKING:
+    import mujoco
 from .src.gs_renderer import GSRenderer
 
 class GSRendererMuJoCo(GSRenderer):
-    def __init__(self, models_dict: Dict[str, str], mj_model: mujoco.MjModel):
+    def __init__(self, models_dict: Dict[str, str], mj_model: "mujoco.MjModel"):
         super().__init__(models_dict)
         self.init_renderer(mj_model)
 
-    def init_renderer(self, mj_model: mujoco.MjModel):
+    def init_renderer(self, mj_model: "mujoco.MjModel") -> None:
         self.gs_idx_start = []
         self.gs_idx_end = []
         self.gs_body_ids = []
@@ -57,7 +58,7 @@ class GSRendererMuJoCo(GSRenderer):
         # Call the generic mapping method in base class
         self.set_objects_mapping(objects_info)
 
-    def update_gaussians(self, mj_data:mujoco.MjData):
+    def update_gaussians(self, mj_data:"mujoco.MjData") -> None:
         if not hasattr(self, 'gs_idx_start') or len(self.gs_idx_start) == 0:
             return
 
@@ -77,8 +78,8 @@ class GSRendererMuJoCo(GSRenderer):
         )
 
     def render(self, 
-               mj_model:mujoco.MjModel, 
-               mj_data:mujoco.MjData, 
+               mj_model:"mujoco.MjModel", 
+               mj_data:"mujoco.MjData", 
                cam_ids:Union[List[int], np.ndarray], 
                width:int, height:int, 
                free_camera:Optional[Any]=None) -> Dict[int, Tuple[Tensor, Tensor]]:
