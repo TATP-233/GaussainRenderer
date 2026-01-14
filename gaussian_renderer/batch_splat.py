@@ -74,6 +74,7 @@ class BatchSplatRenderer:
         scale_list: List[Tensor] = []
         opacity_list: List[Tensor] = []
         sh_list: List[Tensor] = []
+        max_sh_dim = 0
 
         self.gs_idx_start: List[int] = []
         self.gs_idx_end: List[int] = []
@@ -82,6 +83,7 @@ class BatchSplatRenderer:
         # Load per-body gaussians
         for body_name, ply_path in cfg.body_gaussians.items():
             g = load_ply(ply_path)
+            max_sh_dim = max(max_sh_dim, g.sh.shape[1])
             start = len(torch.cat(xyz_list)) if xyz_list else 0
             end = start + len(g.xyz)
             self.gs_idx_start.append(start)
@@ -98,11 +100,19 @@ class BatchSplatRenderer:
         # Optional background/static gaussian
         if cfg.background_ply:
             g = load_ply(cfg.background_ply)
+            max_sh_dim = max(max_sh_dim, g.sh.shape[1])
             xyz_list.append(torch.tensor(g.xyz, device=device, dtype=torch.float32))
             rot_list.append(torch.tensor(g.rot, device=device, dtype=torch.float32))
             scale_list.append(torch.tensor(g.scale, device=device, dtype=torch.float32))
             opacity_list.append(torch.tensor(g.opacity, device=device, dtype=torch.float32))
             sh_list.append(torch.tensor(g.sh, device=device, dtype=torch.float32))
+
+        if sh_list:
+            for i, sh in enumerate(sh_list):
+                cur_dim = sh.shape[1]
+                if cur_dim < max_sh_dim:
+                    pad = torch.zeros(sh.shape[0], max_sh_dim - cur_dim, device=sh.device, dtype=sh.dtype)
+                    sh_list[i] = torch.cat([sh, pad], dim=1)
 
         # Concatenate template
         xyz_all = torch.cat(xyz_list, dim=0)

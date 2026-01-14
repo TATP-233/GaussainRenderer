@@ -32,5 +32,5 @@ from .gs_renderer_mujoco import GSRendererMuJoCo
 from .gs_renderer_motrixsim import GSRendererMotrixSim
 from .batch_splat import BatchSplatConfig, BatchSplatRenderer, MjxBatchSplatRenderer, MtxBatchSplatRenderer
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 __author__ = "Yufei Jia"
