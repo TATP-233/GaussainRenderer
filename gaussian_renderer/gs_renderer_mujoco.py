@@ -26,12 +26,25 @@ from typing import Tuple, List, Union, Dict, Optional, Any, TYPE_CHECKING
 import numpy as np
 from scipy.spatial.transform import Rotation
 from torch import Tensor
+
+try:
+    import mujoco  # type: ignore
+except ImportError as exc:  # pragma: no cover - handled at runtime
+    mujoco = None  # type: ignore
+    _MUJOCO_IMPORT_ERROR = exc
+else:
+    _MUJOCO_IMPORT_ERROR = None
+
 if TYPE_CHECKING:
     import mujoco
 from .src.gs_renderer import GSRenderer
 
 class GSRendererMuJoCo(GSRenderer):
     def __init__(self, models_dict: Dict[str, str], mj_model: "mujoco.MjModel"):
+        if mujoco is None:
+            raise ImportError(
+                "MuJoCo is not installed. Install the mujoco package to use GSRendererMuJoCo."
+            ) from _MUJOCO_IMPORT_ERROR
         super().__init__(models_dict)
         self.init_renderer(mj_model)
 

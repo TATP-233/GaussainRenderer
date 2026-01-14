@@ -26,12 +26,25 @@ from typing import Tuple, List, Union, Dict, Optional, Any, TYPE_CHECKING
 import numpy as np
 from scipy.spatial.transform import Rotation
 from torch import Tensor
+
+try:
+    import motrixsim  # type: ignore
+except ImportError as exc:  # pragma: no cover - handled at runtime
+    motrixsim = None  # type: ignore
+    _MOTRIXSIM_IMPORT_ERROR = exc
+else:
+    _MOTRIXSIM_IMPORT_ERROR = None
+
 if TYPE_CHECKING:
     import motrixsim
 from .src.gs_renderer import GSRenderer
 
 class GSRendererMotrixSim(GSRenderer):
     def __init__(self, models_dict: Dict[str, str], mx_model:"motrixsim.MotrixSimModel") -> None:
+        if motrixsim is None:
+            raise ImportError(
+                "MotrixSim is not installed. Install the motrixsim package to use GSRendererMotrixSim."
+            ) from _MOTRIXSIM_IMPORT_ERROR
         super().__init__(models_dict)
         self.init_renderer(mx_model)
 
