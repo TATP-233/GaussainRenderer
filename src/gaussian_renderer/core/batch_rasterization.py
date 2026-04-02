@@ -165,6 +165,7 @@ def batch_env_render(
     bg_imgs: Optional[Tensor] = None,  # (Nenv, Ncam, H, W, 3)
     minibatch: Optional[int] = None,
     y_up: bool = True,
+    rasterizations: Optional[list] = None,  # used to store intermediate rasterization outputs
 ) -> Tuple[Tensor, Tensor]:
 
     device = gaussians.device
@@ -260,7 +261,8 @@ def batch_env_render(
         render_mode="RGB+D",
         packed=False,
     )
-
+    if rasterizations is not None:
+        rasterizations.extend((renders, alphas, meta))  # store intermediate results for debugging
     # renders: (Nenv, Ncam, H, W, 4) -> RGBD
 
     color_img = renders[..., :3]

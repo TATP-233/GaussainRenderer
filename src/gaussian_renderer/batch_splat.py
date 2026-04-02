@@ -67,6 +67,7 @@ class BatchSplatRenderer:
     def __init__(self, cfg: BatchSplatConfig, body_name_to_id: Optional[Dict[str, int]]) -> None:
         assert torch.cuda.is_available()
         device = cfg.device or torch.device("cuda")
+        self.rasterizations = []  # renders, alphas, meta
 
         self.device = device
         self.minibatch = cfg.minibatch
@@ -185,7 +186,8 @@ class BatchSplatRenderer:
             cam_pos = torch.tensor(cam_pos, device=self.device, dtype=torch.float32)
         if not isinstance(cam_xmat, torch.Tensor):
             cam_xmat = torch.tensor(cam_xmat, device=self.device, dtype=torch.float32)
-        return _batch_env_render(gsb, cam_pos, cam_xmat, height, width, fovy, bg_imgs=bg_imgs, minibatch=self.minibatch)
+        self.rasterizations = []
+        return _batch_env_render(gsb, cam_pos, cam_xmat, height, width, fovy, bg_imgs=bg_imgs, minibatch=self.minibatch, rasterizations=self.rasterizations)
 
 
 if TYPE_CHECKING:
