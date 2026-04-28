@@ -2,9 +2,9 @@
 
 高斯泼溅（Gaussian Splatting）渲染器及工具包。
 
-本仓库主要提供高斯泼溅模型的渲染功能，是 **DISCOVERSE** 项目的一部分。
+本仓库主要提供高斯泼溅模型的渲染功能，最初作为一代工作 **DISCOVERSE** 的高斯渲染组件开发。
 
-在 DISCOVERSE 的基础上，GaussianRenderer 也支持 [gs_playground](https://github.com/discoverse-dev/gs_playground) 的相关工作，包含 Rigid-Link Gaussian Kinematics 所需的高斯渲染组件。
+在 DISCOVERSE 的基础上，GaussianRenderer 进一步支持二代工作 [gs_playground](https://github.com/discoverse-dev/gs_playground)，提供 Rigid-Link Gaussian Kinematics 相关的高斯渲染组件。
 
 关于在仿真环境中的详细使用方法，请参考：[https://github.com/TATP-233/DISCOVERSE](https://github.com/TATP-233/DISCOVERSE)
 

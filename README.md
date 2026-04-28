@@ -4,9 +4,9 @@ A Gaussian Splatting Renderer and Tools package.
 
 [中文文档](README_zh.md)
 
-This repository primarily provides rendering capabilities for Gaussian Splatting models. It is developed as a component of the **DISCOVERSE** project.
+This repository primarily provides rendering capabilities for Gaussian Splatting models. It was first developed as the Gaussian rendering component for **DISCOVERSE**, the first-generation simulation work.
 
-Building on DISCOVERSE, GaussianRenderer also supports [gs_playground](https://github.com/discoverse-dev/gs_playground), which includes the Gaussian rendering components related to Rigid-Link Gaussian Kinematics.
+Building on DISCOVERSE, GaussianRenderer is now extended for [gs_playground](https://github.com/discoverse-dev/gs_playground), the second-generation work, where it provides the Gaussian rendering components related to Rigid-Link Gaussian Kinematics.
 
 For detailed usage within the simulation environment, see: [https://github.com/TATP-233/DISCOVERSE](https://github.com/TATP-233/DISCOVERSE)
 
