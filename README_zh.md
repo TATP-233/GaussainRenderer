@@ -95,4 +95,14 @@ make ci         # 以上全部
     year={2025},
     url={https://arxiv.org/abs/2507.21981}
 }
+
+@misc{jia2026gsplaygroundhighthroughputphotorealisticsimulator,
+    title={GS-Playground: A High-Throughput Photorealistic Simulator for Vision-Informed Robot Learning},
+    author={Yufei Jia and Heng Zhang and Ziheng Zhang and Junzhe Wu and Mingrui Yu and Zifan Wang and Dixuan Jiang and Zheng Li and Chenyu Cao and Zhuoyuan Yu and Xun Yang and Haizhou Ge and Yuchi Zhang and Jiayuan Zhang and Zhenbiao Huang and Tianle Liu and Shenyu Chen and Jiacheng Wang and Bin Xie and Xuran Yao and Xiwa Deng and Guangyu Wang and Jinzhi Zhang and Lei Hao and Zhixing Chen and Yuxiang Chen and Anqi Wang and Hongyun Tian and Yiyi Yan and Zhanxiang Cao and Yizhou Jiang and Hanyang Shao and Yue Li and Lu Shi and Bokui Chen and Wei Sui and Hanqing Cui and Yusen Qin and Ruqi Huang and Lei Han and Tiancai Wang and Guyue Zhou},
+    year={2026},
+    eprint={2604.25459},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO},
+    url={https://arxiv.org/abs/2604.25459}
+}
 ```
