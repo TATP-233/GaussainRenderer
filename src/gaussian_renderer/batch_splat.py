@@ -179,13 +179,24 @@ class BatchSplatRenderer:
         width: int,
         fovy: np.ndarray,
         bg_imgs: Optional[Tensor] = None,
+        y_up: bool = True,
     ):
         """Render RGBD for batch envs and cameras."""
         if not isinstance(cam_pos, torch.Tensor):
             cam_pos = torch.tensor(cam_pos, device=self.device, dtype=torch.float32)
         if not isinstance(cam_xmat, torch.Tensor):
             cam_xmat = torch.tensor(cam_xmat, device=self.device, dtype=torch.float32)
-        return _batch_env_render(gsb, cam_pos, cam_xmat, height, width, fovy, bg_imgs=bg_imgs, minibatch=self.minibatch)
+        return _batch_env_render(
+            gsb,
+            cam_pos,
+            cam_xmat,
+            height,
+            width,
+            fovy,
+            bg_imgs=bg_imgs,
+            minibatch=self.minibatch,
+            y_up=y_up,
+        )
 
 
 if TYPE_CHECKING:
