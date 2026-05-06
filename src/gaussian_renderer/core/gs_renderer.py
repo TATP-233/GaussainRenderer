@@ -47,7 +47,7 @@ class GSRenderer:
 
         self.gaussians = None
         self.need_rerender = True
-        self.gaussians_all: dict[GaussianData] = {}
+        self.gaussians_all: Dict[str, GaussianData] = {}
         self.gaussians_idx = {}
         self.gaussians_size = {}
         idx_sum = 0

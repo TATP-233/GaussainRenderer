@@ -23,10 +23,8 @@ def _make_renderer(body_name_to_id, models_dict):
     gym = _make_gym(body_name_to_id)
     env = MagicMock()
     actor_handle = 0
-    with (
-        patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True),
-        patch("torch.Tensor.cuda", lambda self: self),
-    ):
+    with patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True), \
+            patch("torch.Tensor.cuda", lambda self: self):
         from gaussian_renderer.core.gs_renderer import GSRenderer
 
         renderer = GSRendererIsaacGym.__new__(GSRendererIsaacGym)
@@ -56,10 +54,8 @@ def test_init_renderer_queries_actor_rigid_body_dict():
     gym = _make_gym({"world": 0, "banana": 1})
     env = MagicMock()
     actor = 7
-    with (
-        patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True),
-        patch("torch.Tensor.cuda", lambda self: self),
-    ):
+    with patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True), \
+            patch("torch.Tensor.cuda", lambda self: self):
         from gaussian_renderer.core.gs_renderer import GSRenderer
 
         renderer = GSRendererIsaacGym.__new__(GSRendererIsaacGym)

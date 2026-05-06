@@ -26,10 +26,8 @@ def _make_renderer(link_names, ply_path):
     models_dict = {name: str(ply_path) for name in link_names if name != "world"}
     mx_model = _make_mx_model(link_names)
 
-    with (
-        patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True),
-        patch("torch.Tensor.cuda", lambda self: self),
-    ):
+    with patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True), \
+            patch("torch.Tensor.cuda", lambda self: self):
         from gaussian_renderer.core.gs_renderer import GSRenderer
 
         renderer = GSRendererMotrixSim.__new__(GSRendererMotrixSim)
@@ -78,10 +76,8 @@ def test_init_renderer_no_matching_links():
     models_dict = {"banana": str(BANANA_PLY)}
     mx_model = _make_mx_model(link_names)
 
-    with (
-        patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True),
-        patch("torch.Tensor.cuda", lambda self: self),
-    ):
+    with patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True), \
+            patch("torch.Tensor.cuda", lambda self: self):
         from gaussian_renderer.core.gs_renderer import GSRenderer
 
         renderer = GSRendererMotrixSim.__new__(GSRendererMotrixSim)
@@ -120,10 +116,8 @@ def test_update_gaussians_empty_skips():
     models_dict = {"banana": str(BANANA_PLY)}
     mx_model = _make_mx_model(link_names)
 
-    with (
-        patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True),
-        patch("torch.Tensor.cuda", lambda self: self),
-    ):
+    with patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True), \
+            patch("torch.Tensor.cuda", lambda self: self):
         from gaussian_renderer.core.gs_renderer import GSRenderer
 
         renderer = GSRendererMotrixSim.__new__(GSRendererMotrixSim)

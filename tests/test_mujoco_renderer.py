@@ -37,11 +37,9 @@ def _make_mj_data(n_bodies, n_cams=1):
 
 def _make_renderer(body_names, models_dict):
     mj_model = _make_mj_model(body_names)
-    with (
-        patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True),
-        patch("torch.Tensor.cuda", lambda self: self),
-        patch("gaussian_renderer.gs_renderer_mujoco.mujoco", mujoco_stub),
-    ):
+    with patch("gaussian_renderer.core.gs_renderer.GSPLAT_AVAILABLE", True), \
+            patch("torch.Tensor.cuda", lambda self: self), \
+            patch("gaussian_renderer.gs_renderer_mujoco.mujoco", mujoco_stub):
         from gaussian_renderer.core.gs_renderer import GSRenderer
 
         renderer = GSRendererMuJoCo.__new__(GSRendererMuJoCo)
