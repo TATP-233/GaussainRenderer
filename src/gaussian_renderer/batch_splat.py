@@ -229,4 +229,29 @@ class MtxBatchSplatRenderer(BatchSplatRenderer):
         return super().batch_update_gaussians(body_pos, body_quat, scalar_first=False)
 
 
-__all__ = ["BatchSplatConfig", "BatchSplatRenderer", "MjxBatchSplatRenderer", "MtxBatchSplatRenderer"]
+if TYPE_CHECKING:
+    from isaacgym import gymapi
+
+
+class IsaacBatchSplatRenderer(BatchSplatRenderer):
+    def __init__(
+        self,
+        cfg: BatchSplatConfig,
+        gym: "gymapi.Gym",
+        env: "gymapi.Env",
+        actor_handle: int,
+    ) -> None:
+        body_name_to_id: Dict[str, int] = gym.get_actor_rigid_body_dict(env, actor_handle)
+        super().__init__(cfg, body_name_to_id)
+
+    def batch_update_gaussians(self, body_pos: Tensor, body_quat: Tensor) -> GaussianBatchData:
+        return super().batch_update_gaussians(body_pos, body_quat, scalar_first=False)
+
+
+__all__ = [
+    "BatchSplatConfig",
+    "BatchSplatRenderer",
+    "MjxBatchSplatRenderer",
+    "MtxBatchSplatRenderer",
+    "IsaacBatchSplatRenderer",
+]
