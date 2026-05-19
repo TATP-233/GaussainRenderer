@@ -36,6 +36,7 @@ from .core.super_splat_loader import is_super_splat_format, load_super_splat_ply
 from .core.util_gau import load_ply, save_ply, transform_shs
 from .gs_renderer_isaacgym import GSRendererIsaacGym
 from .gs_renderer_motrixsim import GSRendererMotrixSim
+from .gs_renderer_MuGS import GSRendererMuGS
 from .gs_renderer_mujoco import GSRendererMuJoCo
 
 __version__ = "0.2.0"
